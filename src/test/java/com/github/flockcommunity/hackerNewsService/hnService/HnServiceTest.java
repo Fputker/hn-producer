@@ -6,7 +6,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.ArrayList;
 import java.util.function.Consumer;
 
 @SpringBootTest
@@ -32,6 +31,12 @@ class HnServiceTest {
                 .verifyComplete();
     }
 
+    @Test
+    void getStory() {
 
+        StepVerifier.create(hnService.getStory(23573016).log())
+                .expectNextCount(1L)
+                .verifyComplete();
+    }
 
 }
