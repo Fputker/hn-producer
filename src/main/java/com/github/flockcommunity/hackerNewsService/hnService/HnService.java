@@ -7,10 +7,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class HnService {
+
+
 
     Mono<TopStories> getLatestTopStories() {
         return getTopStoriesDTO().map(it -> mapToTopStories(it));
@@ -33,8 +36,20 @@ public class HnService {
                 .take(10L);
     }
 
+    Flux<String> newStories () {
+        List oldStories = new ArrayList();
 
+        return Flux.interval(Duration.ofSeconds(10L))
+                .flatMap(it -> getTopStoriesDTO())
+                .map(it -> it.subList(0,10))
+                .map(it -> {
+                    oldStories.clear();
+                    oldStories.addAll(it);
+                    return it;
+                })
+                .flatMap(it -> Flux.fromIterable(it));
 
+    }
 
 
     Flux<TopStories> getTopStories() {

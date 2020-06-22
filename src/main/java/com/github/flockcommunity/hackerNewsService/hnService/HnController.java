@@ -24,11 +24,11 @@ public class HnController {
 
     @GetMapping(path = "/topstories")
     Flux<String> getTopStories () {
-        return hnService.getSingleStringFlux();
+        return hnService.newStories();
     }
 
     @GetMapping(path = "/{id}")
-    Mono<Story> getLatestTopStories (@PathVariable int id) {
+    Mono<Story> getStory (@PathVariable int id) {
         return hnService.getStory(id);
     }
 

@@ -4,14 +4,14 @@ import java.util.List;
 
 public class TopStories {
 
-    public List getStoryList() {
-        return storyList;
-    }
-
     private List storyList;
 
     TopStories(List array) {
         storyList = array;
+    }
+
+    public List getStoryList() {
+        return storyList;
     }
 
     @Override
