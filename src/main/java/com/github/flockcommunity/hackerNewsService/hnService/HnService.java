@@ -9,10 +9,10 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class HnService {
-
 
 
     Mono<TopStories> getLatestTopStories() {
@@ -20,7 +20,7 @@ public class HnService {
     }
 
     private Mono<List> getTopStoriesDTO() {
-        WebClient HnClient = WebClient.create(HnEndpoints.TOPSTORIES_ENDPOINT_V0);
+        WebClient HnClient = WebClient.create(HnEndpoints.NEWSTORIES_ENDPOINT_V0);
         return HnClient.get()
                 .retrieve()
                 .bodyToMono(List.class);
@@ -30,27 +30,31 @@ public class HnService {
         return new TopStories(hnTopStories.subList(0, 10));
     }
 
-    Flux getSingleStringFlux () {
+    Flux<?> getSingleStringFlux() {
         return getTopStoriesDTO()
-                .flatMapMany(it -> Flux.fromIterable(it))
+                .flatMapMany(Flux::fromIterable)
                 .take(10L);
     }
 
-    Flux<String> newStories () {
-        List oldStories = new ArrayList();
+    Flux newStoriesFlux() {
+        List oldStories = new ArrayList<String>();
 
         return Flux.interval(Duration.ofSeconds(10L))
                 .flatMap(it -> getTopStoriesDTO())
-                .map(it -> it.subList(0,10))
+                .map(it -> it.subList(0, 10))
                 .map(it -> {
-                    oldStories.clear();
-                    oldStories.addAll(it);
-                    return it;
+                    List newStories = newStories(oldStories, it);
+                    oldStories.addAll(newStories);
+                    return newStories;
                 })
-                .flatMap(it -> Flux.fromIterable(it));
-
+                .flatMap(Flux::fromIterable);
     }
 
+    List newStories(List<?> oldStories, List<?> stories) {
+        return stories.stream()
+                .filter(e -> !oldStories.contains(e))
+                .collect(Collectors.toList());
+    }
 
     Flux<TopStories> getTopStories() {
         return Flux.interval(Duration.ofSeconds(10L))
@@ -58,10 +62,12 @@ public class HnService {
     }
 
     Mono<Story> getStory(int id) {
-        return WebClient.create(HnEndpoints.ITEM_ENDPOINT_V0.concat(String.valueOf(id)).concat(".json"))
+        return WebClient.create(HnEndpoints.ITEM_ENDPOINT_V0.concat(String.valueOf(id)).concat(".json?print=pretty"))
                 .get()
                 .retrieve()
                 .onStatus(HttpStatus::isError, it -> Mono.error(new RuntimeException("HELP!")))
                 .bodyToMono(Story.class);
     }
+
+    
 }

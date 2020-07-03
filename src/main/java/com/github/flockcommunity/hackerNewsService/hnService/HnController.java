@@ -24,7 +24,7 @@ public class HnController {
 
     @GetMapping(path = "/topstories")
     Flux<String> getTopStories () {
-        return hnService.newStories();
+        return hnService.newStoriesFlux();
     }
 
     @GetMapping(path = "/{id}")
