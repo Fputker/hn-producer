@@ -9,6 +9,7 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,7 +30,6 @@ public class HnService {
     private TopStories mapToTopStories(List hnTopStories) {
         return new TopStories(hnTopStories.subList(0, 10));
     }
-
     Flux<?> getSingleStringFlux() {
         return getTopStoriesDTO()
                 .flatMapMany(Flux::fromIterable)
@@ -38,8 +38,9 @@ public class HnService {
 
     Flux newStoriesFlux() {
         List oldStories = new ArrayList<String>();
+        Random random = new Random();
 
-        return Flux.interval(Duration.ofSeconds(10L))
+        return Flux.interval(Duration.ofSeconds(0), Duration.ofSeconds( random.nextInt(30)))
                 .flatMap(it -> getTopStoriesDTO())
                 .map(it -> it.subList(0, 10))
                 .map(it -> {
