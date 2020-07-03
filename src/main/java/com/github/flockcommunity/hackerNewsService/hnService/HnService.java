@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -15,21 +16,28 @@ import java.util.stream.Collectors;
 @Service
 public class HnService {
 
-
     Mono<TopStories> getLatestTopStories() {
         return getTopStoriesDTO().map(it -> mapToTopStories(it));
     }
 
     private Mono<List> getTopStoriesDTO() {
+
         WebClient HnClient = WebClient.create(HnEndpoints.NEWSTORIES_ENDPOINT_V0);
         return HnClient.get()
                 .retrieve()
-                .bodyToMono(List.class);
+                .bodyToMono(List.class)
+                .map(this::reverse);
+    }
+
+    private  List reverse(List list) {
+            Collections.reverse(list);
+            return list;
     }
 
     private TopStories mapToTopStories(List hnTopStories) {
         return new TopStories(hnTopStories.subList(0, 10));
     }
+
     Flux<?> getSingleStringFlux() {
         return getTopStoriesDTO()
                 .flatMapMany(Flux::fromIterable)
@@ -40,7 +48,7 @@ public class HnService {
         List oldStories = new ArrayList<String>();
         Random random = new Random();
 
-        return Flux.interval(Duration.ofSeconds(0), Duration.ofSeconds( random.nextInt(30)))
+        return Flux.interval(Duration.ofSeconds(0), Duration.ofSeconds(random.nextInt(30)))
                 .flatMap(it -> getTopStoriesDTO())
                 .map(it -> it.subList(0, 10))
                 .map(it -> {
@@ -70,5 +78,5 @@ public class HnService {
                 .bodyToMono(Story.class);
     }
 
-    
+
 }
