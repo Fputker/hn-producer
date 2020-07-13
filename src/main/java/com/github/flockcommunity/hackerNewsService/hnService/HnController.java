@@ -1,11 +1,9 @@
 package com.github.flockcommunity.hackerNewsService.hnService;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @RestController()
 @RequestMapping(path="/stories")
@@ -17,21 +15,19 @@ public class HnController {
         this.hnService = hnService;
     }
 
-    @GetMapping(path = "/latest-topstories")
-    Mono<TopStories> getLatestTopStories () {
-        return hnService.getLatestTopStories().log();
+//    @GetMapping(path = "/latest-topstories")
+//    Mono<TopStories> getLatestTopStories () {
+//        return hnService.getNewStories().log();
+//    }
+//
+    @GetMapping(path = "/newstories")
+    Flux<Long> getNewStories () {
+        return hnService.getNewStoriesPublisher();
     }
 
-    @GetMapping(path = "/topstories")
-    Flux<String> getTopStories () {
-        return hnService.newStoriesFlux();
-    }
-
-    @GetMapping(path = "/{id}")
-    Mono<Story> getStory (@PathVariable int id) {
-        return hnService.getStory(id);
-    }
-
-
+//    @GetMapping(path = "/{id}")
+//    Mono<Story> getStory (@PathVariable int id) {
+//        return hnService.getStoryTitle(id);
+//    }
 
 }
